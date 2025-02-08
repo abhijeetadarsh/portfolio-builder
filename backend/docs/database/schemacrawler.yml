@@ -1,0 +1,25 @@
+services:
+  schemacrawler:
+    image: schemacrawler/schemacrawler
+    container_name: sc_container
+    volumes:
+      - ./:/output
+    networks:
+      - pb_network_dev
+    command: >
+      /opt/schemacrawler/bin/schemacrawler.sh
+      --server=postgresql
+      --host=postgres_dev
+      --port=5432
+      --database=pb_db_dev
+      --user=pb_user_dev
+      --password=pb_password_dev
+      --info-level=standard
+      --command=schema
+      --output-format=png
+      --output-file=/output/schema_output.png
+
+networks:
+  pb_network_dev:
+    name: backend_pb_network_dev
+    external: true
