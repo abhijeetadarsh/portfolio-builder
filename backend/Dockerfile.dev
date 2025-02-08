@@ -1,0 +1,14 @@
+# Dockerfile.dev (Development)
+FROM node:23-alpine3.20
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Expose API port
+EXPOSE 3000
+
+# We don't copy the source code here because it will be mounted as a volume
+CMD ["npm", "run", "dev"]

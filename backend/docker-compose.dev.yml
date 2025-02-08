@@ -1,0 +1,51 @@
+services:
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: pb_dev
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres_dev:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=development
+      - POSTGRES_HOST=postgres_dev
+      - POSTGRES_DB=pb_db_dev
+      - POSTGRES_USER=pb_user_dev
+      - POSTGRES_PASSWORD=pb_password_dev
+      - POSTGRES_PORT=5432
+    volumes:
+      - .:/app
+    networks:
+      - pb_network_dev
+    restart: unless-stopped
+    command: npm run dev
+
+  postgres_dev:
+    image: postgres:17.2
+    container_name: pb_postgres_dev
+    environment:
+      - POSTGRES_DB=pb_db_dev
+      - POSTGRES_USER=pb_user_dev
+      - POSTGRES_PASSWORD=pb_password_dev
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    networks:
+      - pb_network_dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pb_user_dev -d pb_db_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  pb_network_dev:
+    driver: bridge
+
+volumes:
+  postgres_data_dev:
