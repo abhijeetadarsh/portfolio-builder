@@ -1,0 +1,7 @@
+{
+  "verbose": false,
+  "watch": ["src"],
+  "ext": "ts yaml",
+  "ignore": ["**/*.spec.ts", "**/*.test.ts"],
+  "exec": "pnpm build && pnpm start"
+}
