@@ -11,9 +11,9 @@ services:
       --server=postgresql
       --host=postgres_dev
       --port=5432
-      --database=pb_db_dev
-      --user=pb_user_dev
-      --password=pb_password_dev
+      --database=pb_db
+      --user=pb_user
+      --password=pb_password
       --info-level=standard
       --command=schema
       --output-format=png
