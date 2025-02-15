@@ -1,8 +1,10 @@
-const swaggerJsdoc = require("swagger-jsdoc");
-const swaggerUi = require("swagger-ui-express");
-const path = require("path");
+import { Application } from "express";
+import path from "path";
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
+import src from "../.js";
 
-const options = {
+const options: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.0.0",
     info: {
@@ -13,7 +15,7 @@ const options = {
     servers: [
       {
         url: "http://localhost:3000",
-        description: "Development server",
+        // description: "Development server",
       },
     ],
     components: {
@@ -31,10 +33,13 @@ const options = {
       },
     ],
   },
-  apis: [path.join(__dirname, "../routes/*.js")], // Use absolute path
+  apis: [path.join(src, "swagger/*.yaml")],
 };
 
 const specs = swaggerJsdoc(options);
-module.exports = (app) => {
+
+const setupSwagger = (app: Application): void => {
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 };
+
+export default setupSwagger;
