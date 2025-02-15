@@ -1,35 +1,39 @@
 services:
   api:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile.dev
     container_name: pb_dev
     ports:
-      - "3000:3000"
+      - "3000:${PORT}"
     depends_on:
       postgres_dev:
         condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+      # ^ creates an anonymous volume for the /app/node_modules directory inside the container
     environment:
       - NODE_ENV=development
       - POSTGRES_HOST=postgres_dev
-      - POSTGRES_DB=pb_db_dev
-      - POSTGRES_USER=pb_user_dev
-      - POSTGRES_PASSWORD=pb_password_dev
-      - POSTGRES_PORT=5432
-    volumes:
-      - .:/app
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - PORT=${PORT}
+      - JWT_SECRET=${JWT_SECRET}
     networks:
       - pb_network_dev
-    restart: unless-stopped
-    command: npm run dev
+    # restart: unless-stopped
+    # command: tail -f /dev/null
 
   postgres_dev:
     image: postgres:17.2
     container_name: pb_postgres_dev
     environment:
-      - POSTGRES_DB=pb_db_dev
-      - POSTGRES_USER=pb_user_dev
-      - POSTGRES_PASSWORD=pb_password_dev
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
@@ -38,7 +42,7 @@ services:
       - pb_network_dev
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pb_user_dev -d pb_db_dev"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
