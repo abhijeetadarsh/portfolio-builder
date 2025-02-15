@@ -1,0 +1,22 @@
+tags:
+  name: Certificates
+  description: Certificates
+
+/api/portfolios/{id}/certificates:
+  post:
+    summary: Add certificate to portfolio
+    tags: [Certificates]
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Certificate"
+    responses:
+      201:
+        description: Certificate added successfully

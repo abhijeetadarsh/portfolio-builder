@@ -1,0 +1,22 @@
+tags:
+  name: Projects
+  description: Projects
+
+/api/portfolios/{id}/projects:
+  post:
+    summary: Add project to portfolio
+    tags: [Projects]
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Project"
+    responses:
+      201:
+        description: Project added successfully

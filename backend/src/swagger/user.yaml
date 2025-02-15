@@ -1,0 +1,131 @@
+tags:
+  name: Users
+  description: User profile endpoints
+
+/api/users/profile:
+  get:
+    summary: Get user profile
+    tags: [Users]
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: User profile retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Profile"
+      401:
+        description: Unauthorized - Invalid or missing token
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+      404:
+        description: User not found
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+      500:
+        description: Server error
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+  put:
+    summary: Update user profile
+    tags: [Users]
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProfileUpdate"
+    responses:
+      200:
+        description: Profile updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Profile"
+      400:
+        description: Invalid input
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+      401:
+        description: Unauthorized - Invalid or missing token
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+      404:
+        description: User not found
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+      500:
+        description: Server error
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Profile:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        bio:
+          type: string
+          example: "Full-stack developer with 5 years of experience"
+        githubUrl:
+          type: string
+          example: "https://github.com/johndoe"
+        linkedinUrl:
+          type: string
+          example: "https://linkedin.com/in/johndoe"
+        twitterUrl:
+          type: string
+          example: "https://twitter.com/johndoe"
+    ProfileUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "John Doe"
+        bio:
+          type: string
+          example: "Full-stack developer with 5 years of experience"
+        githubUrl:
+          type: string
+          example: "https://github.com/johndoe"
+        linkedinUrl:
+          type: string
+          example: "https://linkedin.com/in/johndoe"
+        twitterUrl:
+          type: string
+          example: "https://twitter.com/johndoe"
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Error message"

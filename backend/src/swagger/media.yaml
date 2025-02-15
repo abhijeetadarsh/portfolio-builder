@@ -1,0 +1,21 @@
+tags:
+  name: Media
+  description: Media
+
+/api/upload:
+  post:
+    summary: Upload media file
+    tags: [Media]
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              file:
+                type: string
+                format: binary
+    responses:
+      200:
+        description: File uploaded successfully
