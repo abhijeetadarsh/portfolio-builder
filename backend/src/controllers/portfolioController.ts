@@ -5,13 +5,14 @@ import { Certificate, Portfolio, Project, User } from "../models/index.js";
 
 const createPortfolio = async (req: Request, res: Response): Promise<void> => {
   try {
+    const user = res.locals.user!;
     const result = await sequelize.transaction(async (): Promise<void> => {
       const { projectIds, certificateIds, ...portfolioData } = req.body;
       console.log(req.body);
 
       const portfolio = await Portfolio.create({
         ...portfolioData,
-        userId: res.locals.user.id,
+        userId: user.id,
         shareableLink: `portfolio-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
       });
 
@@ -43,54 +44,35 @@ const createPortfolio = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error: any) {
     res.status(500).json({
-          success: false, error: error.message });
+      success: false,
+      error: error.message,
+    });
   }
 };
 
 const updatePortfolio = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Only find the portfolio if it belongs to the authenticated user
-    const portfolio = await Portfolio.findOne({
-      where: {
-        id: req.params.id,
-        userId: res.locals.user.id, // Ensure ownership
-      },
-    });
-
-    if (!portfolio) {
-      res.status(404).json({
-          success: false, error: "Portfolio not found" });
-      return;
-    }
-
+    const portfolio = res.locals.portfolio!;
     await portfolio.update(req.body);
     res.json(portfolio);
   } catch (error: any) {
     res.status(500).json({
-          success: false, error: error.message });
+      success: false,
+      error: error.message,
+    });
   }
 };
 
 const deletePortfolio = async (req: Request, res: Response): Promise<void> => {
   try {
-    const portfolio = await Portfolio.findOne({
-      where: {
-        id: req.params.id,
-        userId: res.locals.user.id, // Ensure ownership
-      },
-    });
-
-    if (!portfolio) {
-      res.status(404).json({
-          success: false, error: "Portfolio not found" });
-      return;
-    }
-
+    const portfolio = res.locals.portfolio!;
     await portfolio.destroy();
-    res.status(204).json(); // No content response for successful deletion
+    res.status(204).json();
   } catch (error: any) {
     res.status(500).json({
-          success: false, error: error.message });
+      success: false,
+      error: error.message,
+    });
   }
 };
 
@@ -109,12 +91,16 @@ const getPortfolioByLink = async (req: Request, res: Response): Promise<void> =>
     });
     if (!portfolio) {
       res.status(404).json({
-          success: false, error: "Portfolio not found" });
+        success: false,
+        error: "Portfolio not found",
+      });
     }
     res.json(portfolio);
   } catch (error: any) {
     res.status(500).json({
-          success: false, error: error.message });
+      success: false,
+      error: error.message,
+    });
   }
 };
 

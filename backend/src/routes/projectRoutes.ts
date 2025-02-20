@@ -21,6 +21,6 @@ router.delete("/:id", authenticate, checkProjectOwnership, deleteProject);
 
 router.get("/", authenticate, getAllProjects);
 
-router.get("/:id", authenticate, getProjectById);
+router.get("/:id", authenticate, checkProjectOwnership, getProjectById);
 
 export default router;

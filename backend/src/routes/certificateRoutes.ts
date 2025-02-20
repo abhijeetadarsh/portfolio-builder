@@ -21,6 +21,6 @@ router.delete("/:id", authenticate, checkCertificateOwnership, deleteCertificate
 
 router.get("/", authenticate, getAllCertificates);
 
-router.get("/:id", authenticate, getCertificateById);
+router.get("/:id", authenticate, checkCertificateOwnership, getCertificateById);
 
 export default router;

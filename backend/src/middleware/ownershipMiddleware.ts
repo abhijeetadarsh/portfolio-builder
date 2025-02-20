@@ -25,6 +25,8 @@ const createOwnershipMiddleware = <T extends Model & OwnedResource, M extends Mo
 ) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      const user = res.locals.user!;
+
       if (!req.params.id) {
         res.status(400).json({
           success: false,
@@ -53,7 +55,7 @@ const createOwnershipMiddleware = <T extends Model & OwnedResource, M extends Mo
         return;
       }
 
-      if (resource.userId !== res.locals.user.id) {
+      if (resource.userId !== user.id) {
         res.status(403).json({
           success: false,
           error: `You don't have permission to access this ${resourceName}`,
@@ -61,8 +63,7 @@ const createOwnershipMiddleware = <T extends Model & OwnedResource, M extends Mo
         return;
       }
 
-      // Store the resource in res.locals for potential future use
-      res.locals[resourceName] = resource;
+      res.locals[resourceName] = resource as any;
       next();
     } catch (error) {
       const errorResponse = handleOwnershipError(error);

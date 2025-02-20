@@ -49,7 +49,9 @@ app.use("/api/certificates", certificateRoutes);
 // 404 handler for undefined routes
 app.use((_req: Request, res: Response) => {
   res.status(404).json({
-          success: false, error: "Route not found" });
+    success: false,
+    error: "Route not found",
+  });
 });
 
 // Global error handling middleware
@@ -62,7 +64,7 @@ app.use((err: AppError, _req: Request, res: Response, next: NextFunction): void 
   const statusCode = err.status || err.statusCode || 500;
 
   res.status(statusCode).json({
-          success: false,
+    success: false,
     error: process.env.NODE_ENV === "production" ? "Internal server error" : err.message || "Internal server error",
     ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });

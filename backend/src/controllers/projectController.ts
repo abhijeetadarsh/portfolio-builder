@@ -4,9 +4,10 @@ import { Project } from "../models/index.js";
 
 const createProject = async (req: Request, res: Response): Promise<void> => {
   try {
+    const user = res.locals.user!;
     const projectData = {
       ...req.body,
-      userId: res.locals.user.id,
+      userId: user.id,
     };
 
     const newProject = await Project.create(projectData);
@@ -35,12 +36,9 @@ const createProject = async (req: Request, res: Response): Promise<void> => {
 
 const updateProject = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
-    const projectData = req.body;
-    // The ! tells TypeScript this will never be null
-    const project = (await Project.findByPk(id))!;
+    const project = res.locals.project!;
 
-    await project.update(projectData);
+    await project.update(req.body);
     res.status(200).json({
       success: true,
       data: project,
@@ -66,8 +64,7 @@ const updateProject = async (req: Request, res: Response): Promise<void> => {
 
 const deleteProject = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
-    const project = (await Project.findByPk(id))!;
+    const project = res.locals.project!;
 
     await project.destroy();
     res.status(200).json({
@@ -84,10 +81,33 @@ const deleteProject = async (req: Request, res: Response): Promise<void> => {
 
 const getAllProjects = async (req: Request, res: Response): Promise<void> => {
   try {
-    const projects = await Project.findAll();
+    const user = res.locals.user!;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = (page - 1) * limit;
+
+    const { count, rows: projects } = await Project.findAndCountAll({
+      where: {
+        userId: user.id,
+      },
+      limit,
+      offset,
+      order: [["createdAt", "DESC"]],
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
     res.status(200).json({
       success: true,
-      data: projects,
+      data: {
+        projects,
+        pagination: {
+          total: count,
+          page,
+          totalPages,
+          hasMore: page < totalPages,
+        },
+      },
     });
   } catch (error) {
     res.status(500).json({
@@ -99,8 +119,7 @@ const getAllProjects = async (req: Request, res: Response): Promise<void> => {
 
 const getProjectById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
-    const project = (await Project.findByPk(id))!;
+    const project = res.locals.project!;
 
     res.status(200).json({
       success: true,
