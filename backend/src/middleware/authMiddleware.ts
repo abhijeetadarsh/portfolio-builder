@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-import { jwtSecret } from "../config/auth.js";
+import { CustomJwtPayload, jwtSecret } from "../config/auth.js";
 import { AuthContext } from "../context/AuthContext.js";
 import { User } from "../models/index.js";
 
@@ -9,11 +9,6 @@ declare module "express" {
   interface Response {
     locals: AuthContext;
   }
-}
-
-interface CustomJwtPayload extends jwt.JwtPayload {
-  id: number;
-  email: string;
 }
 
 const authenticate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -43,7 +38,7 @@ const authenticate = async (req: Request, res: Response, next: NextFunction): Pr
 
     res.locals.user = user; // Store user in `res.locals`
     next();
-  } catch (err) {
+  } catch (err: any) {
     res.status(401).json({
       success: false,
       message: "Invalid token",

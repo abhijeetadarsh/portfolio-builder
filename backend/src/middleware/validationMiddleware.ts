@@ -25,6 +25,20 @@ const registerSchema = z.object({
     .regex(/^[a-zA-Z\s]*$/, "Name can only contain letters and spaces"),
 });
 
+const changePasswordSchema = z.object({
+  oldPassword: z.string().min(6, "Password must be at least 6 characters"),
+  newPassword: passwordSchema,
+});
+
+const forgotPasswordSchema = z.object({
+  email: z.string().email("Invalid email format"),
+});
+
+const resetPasswordSchema = z.object({
+  token: z.string(),
+  newPassword: passwordSchema,
+});
+
 // Portfolio schema
 const portfolioSchema = z.object({
   template: z.enum(["modern", "classic", "minimal"], {
@@ -76,6 +90,9 @@ const certificateSchema = z.object({
 // Types
 type LoginInput = z.infer<typeof loginSchema>;
 type RegisterInput = z.infer<typeof registerSchema>;
+type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 type PortfolioInput = z.infer<typeof portfolioSchema>;
 type ProjectInput = z.infer<typeof projectSchema>;
 type CertificateInput = z.infer<typeof certificateSchema>;
@@ -109,6 +126,9 @@ const validate = (schema: z.ZodSchema) => async (req: Request, res: Response, ne
 // Export validation middlewares
 const validateLogin = validate(loginSchema);
 const validateRegister = validate(registerSchema);
+const validateChangePassword = validate(changePasswordSchema);
+const validateForgotPassword = validate(forgotPasswordSchema);
+const validateResetPassword = validate(resetPasswordSchema);
 const validatePortfolio = validate(portfolioSchema);
 const validateProject = validate(projectSchema);
 const validateCertificate = validate(certificateSchema);
@@ -116,11 +136,15 @@ const validateCertificate = validate(certificateSchema);
 export {
   validateLogin,
   validateRegister,
+  validateChangePassword,
+  validateForgotPassword,
+  validateResetPassword,
   validatePortfolio,
   validateProject,
   validateCertificate,
   type LoginInput,
   type RegisterInput,
+  type ChangePasswordInput,
   type PortfolioInput,
   type ProjectInput,
   type CertificateInput,

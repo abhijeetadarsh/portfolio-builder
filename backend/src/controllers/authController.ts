@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-import { jwtExpires, jwtSecret } from "../config/auth.js";
+import { CustomJwtPayload, jwtExpires, jwtSecret } from "../config/auth.js";
 import { User } from "../models/index.js";
+import { sendEmail } from "../services/emailService.js";
 
 const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -84,23 +85,7 @@ const login = async (req: Request, res: Response): Promise<void> => {
 const changePassword = async (req: Request, res: Response): Promise<void> => {
   try {
     const { oldPassword, newPassword } = req.body;
-    if (!res.locals.user) {
-      res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
-      return;
-    }
-
-    const user = await User.findByPk(res.locals.user.id);
-
-    if (!user) {
-      res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-      return;
-    }
+    const user = res.locals.user!;
 
     if (!(await user.validPassword(oldPassword))) {
       res.status(401).json({
@@ -129,7 +114,7 @@ const changePassword = async (req: Request, res: Response): Promise<void> => {
     user.password = newPassword;
     await user.save();
 
-    res.json({ message: "Password updated successfully" });
+    res.json({ success: true, message: "Password updated successfully" });
   } catch (error: any) {
     res.status(500).json({
       success: false,
@@ -138,4 +123,66 @@ const changePassword = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { changePassword, login, register };
+const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+      return;
+    }
+
+    const token = jwt.sign({ id: user.id }, jwtSecret, { expiresIn: "1h" });
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+
+    const emailOptions = {
+      from: process.env.EMAIL_USER as string,
+      to: email as string,
+      subject: "Reset Password",
+      text: `Click the link below to reset your password: ${resetLink}`,
+    };
+
+    await sendEmail(emailOptions);
+
+    res.json({ success: true, message: "Password reset email sent" });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { token, newPassword } = req.body;
+
+    const decoded = jwt.verify(token, jwtSecret) as CustomJwtPayload;
+
+    const user = await User.findByPk(decoded.id);
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+      return;
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ success: true, message: "Password reset successfully" });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export { changePassword, login, register, forgotPassword, resetPassword };
