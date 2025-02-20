@@ -2,7 +2,7 @@ import { Application } from "express";
 import path from "path";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
-import src from "../.js";
+import srcPath from "../srcPath.js";
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -33,7 +33,7 @@ const options: swaggerJsdoc.Options = {
       },
     ],
   },
-  apis: [path.join(src, "swagger/*.yaml")],
+  apis: [path.join(srcPath, "swagger/*.yaml")],
 };
 
 const specs = swaggerJsdoc(options);

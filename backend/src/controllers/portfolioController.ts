@@ -42,7 +42,8 @@ const createPortfolio = async (req: Request, res: Response): Promise<void> => {
       res.status(201).json(fullPortfolio);
     });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+          success: false, error: error.message });
   }
 };
 
@@ -57,14 +58,16 @@ const updatePortfolio = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (!portfolio) {
-      res.status(404).json({ error: "Portfolio not found" });
+      res.status(404).json({
+          success: false, error: "Portfolio not found" });
       return;
     }
 
     await portfolio.update(req.body);
     res.json(portfolio);
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+          success: false, error: error.message });
   }
 };
 
@@ -78,14 +81,16 @@ const deletePortfolio = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (!portfolio) {
-      res.status(404).json({ error: "Portfolio not found" });
+      res.status(404).json({
+          success: false, error: "Portfolio not found" });
       return;
     }
 
     await portfolio.destroy();
     res.status(204).json(); // No content response for successful deletion
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+          success: false, error: error.message });
   }
 };
 
@@ -103,11 +108,13 @@ const getPortfolioByLink = async (req: Request, res: Response): Promise<void> =>
       ],
     });
     if (!portfolio) {
-      res.status(404).json({ error: "Portfolio not found" });
+      res.status(404).json({
+          success: false, error: "Portfolio not found" });
     }
     res.json(portfolio);
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+          success: false, error: error.message });
   }
 };
 

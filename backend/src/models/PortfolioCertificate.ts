@@ -2,14 +2,15 @@ import { DataTypes, Model } from "sequelize";
 
 import sequelize from "../config/database.js";
 
+// Base attributes interface
 interface PortfolioCertificateAttributes {
   portfolioId: number;
   certificateId: number;
 }
 
 class PortfolioCertificate extends Model<PortfolioCertificateAttributes> implements PortfolioCertificateAttributes {
-  public portfolioId!: number;
-  public certificateId!: number;
+  declare portfolioId: number;
+  declare certificateId: number;
 }
 
 PortfolioCertificate.init(
@@ -27,8 +28,9 @@ PortfolioCertificate.init(
   },
   {
     sequelize,
-    tableName: "PortfolioCertificates",
+    tableName: "portfolios_x_certificates",
     timestamps: false,
+    underscored: true,
   }
 );
 

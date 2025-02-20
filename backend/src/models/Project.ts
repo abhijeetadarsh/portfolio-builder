@@ -1,77 +1,91 @@
-import { DataTypes, Model, Optional } from "sequelize";
-
+import { DataTypes, InitOptions, Model, ModelAttributes, Optional } from "sequelize";
 import sequelize from "../config/database.js";
 
-// Define the attributes for the Project model
+// Base attributes interface
 interface ProjectAttributes {
-  id: number;
+  readonly id: number;
   title: string;
-  description?: string;
-  githubUrl?: string;
-  demoUrl?: string;
-  images: string[];
+  description?: string | null;
+  repoUrl?: string | null;
+  demoUrl?: string | null;
+  images?: string[];
   userId: number;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+// Interface for creating a new project
+interface ProjectCreationAttributes extends Omit<ProjectAttributes, "id" | "createdAt" | "updatedAt"> {
+  id?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-// Define attributes for creating a new Project instance
-interface ProjectCreationAttributes
-  extends Optional<ProjectAttributes, "id" | "description" | "githubUrl" | "demoUrl" | "images" | "createdAt" | "updatedAt"> {}
-
 // Create the Project model class
 class Project extends Model<ProjectAttributes, ProjectCreationAttributes> implements ProjectAttributes {
-  public id!: number;
-  public title!: string;
-  public description?: string;
-  public githubUrl?: string;
-  public demoUrl?: string;
-  public images!: string[];
-  public userId!: number;
-
-  // timestamps
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  declare readonly id: number;
+  declare title: string;
+  declare description: string | null;
+  declare repoUrl: string | null;
+  declare demoUrl: string | null;
+  declare images: string[];
+  declare userId: number;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 }
 
-Project.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    title: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    githubUrl: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    demoUrl: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    images: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: false,
-      defaultValue: [],
-    },
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
+// Model attributes configuration
+const attributes: ModelAttributes<Project, ProjectAttributes> = {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  {
-    sequelize,
-    tableName: "projects",
-    timestamps: true,
-  }
-);
+  title: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: false,
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  repoUrl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  demoUrl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  images: {
+    type: DataTypes.ARRAY(DataTypes.STRING),
+    allowNull: false,
+    defaultValue: [],
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+};
+
+// Model configuration options
+const options: InitOptions<Project> = {
+  sequelize,
+  tableName: "projects",
+  timestamps: true,
+  underscored: true,
+};
+
+// Initialize the model
+Project.init(attributes, options);
 
 export default Project;

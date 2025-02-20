@@ -1,9 +1,12 @@
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
+
 import setupSwagger from "./config/swagger.js";
 import authRoutes from "./routes/authRoutes.js";
-import portfolioRoutes from "./routes/portfolioRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import projectRoutes from "./routes/projectRoutes.js";
+import portfolioRoutes from "./routes/portfolioRoutes.js";
+import certificateRoutes from "./routes/certificateRoutes.js";
 
 // Define an error interface for better type safety
 interface AppError extends Error {
@@ -39,11 +42,14 @@ setupSwagger(app);
 // API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/projects", projectRoutes);
 app.use("/api/portfolios", portfolioRoutes);
+app.use("/api/certificates", certificateRoutes);
 
 // 404 handler for undefined routes
 app.use((_req: Request, res: Response) => {
-  res.status(404).json({ error: "Route not found" });
+  res.status(404).json({
+          success: false, error: "Route not found" });
 });
 
 // Global error handling middleware
@@ -56,11 +62,10 @@ app.use((err: AppError, _req: Request, res: Response, next: NextFunction): void 
   const statusCode = err.status || err.statusCode || 500;
 
   res.status(statusCode).json({
+          success: false,
     error: process.env.NODE_ENV === "production" ? "Internal server error" : err.message || "Internal server error",
     ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });
 });
 
 export default app;
-
-// /home/bird/Desktop/auro/backend/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node

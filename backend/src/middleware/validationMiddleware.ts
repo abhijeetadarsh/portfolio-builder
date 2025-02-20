@@ -1,163 +1,127 @@
-import { NextFunction, Request, Response } from "express";
-import { check, matchedData, validationResult } from "express-validator";
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
 
-// Helper function for URL validation
-const isValidUrl = (string: string): boolean => {
-  try {
-    new URL(string);
-    return true;
-  } catch (_) {
-    return false;
-  }
-};
+// Shared schemas
+const passwordSchema = z
+  .string()
+  .min(6, "Password must be at least 6 characters")
+  .regex(/^(?=.*[A-Za-z])(?=.*\d)/, "Password must contain at least one letter and one number");
 
-// Common validation middleware
-const validationMiddleware = (req: Request, res: Response, next: NextFunction): void => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(400).json({
-      errors: errors.array().map((err) => ({
-        message: err.msg,
-      })),
-    });
-    return;
-  }
+const urlSchema = z.string().url("Invalid URL format").optional().nullable();
 
-  req.body = matchedData(req, {
-    locations: ["body"],
-    includeOptionals: true,
-  });
+// Auth schemas
+const loginSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
 
-  next();
-};
+const registerSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  password: passwordSchema,
+  name: z
+    .string()
+    .min(2, "Name must be at least 2 characters")
+    .max(50, "Name cannot exceed 50 characters")
+    .regex(/^[a-zA-Z\s]*$/, "Name can only contain letters and spaces"),
+});
 
-const loginValidation = [
-  check("email").trim().notEmpty().withMessage("Email is required").isEmail().withMessage("Invalid email format").normalizeEmail(),
-  check("password")
-    .notEmpty()
-    .withMessage("Password is required")
-    .isLength({
-      min: 6,
+// Portfolio schema
+const portfolioSchema = z.object({
+  template: z.enum(["modern", "classic", "minimal"], {
+    errorMap: () => ({ message: "Invalid template type" }),
+  }),
+  title: z.string().min(3, "Title must be at least 3 characters").max(100, "Title cannot exceed 100 characters"),
+  description: z.string().max(500, "Description cannot exceed 500 characters").optional(),
+  skills: z.array(z.string()).optional(),
+  projectIds: z.array(z.number().positive()).optional(),
+  certificateIds: z.array(z.number().positive()).optional(),
+});
+
+// Project schema
+const projectSchema = z.object({
+  title: z.string().min(3, "Title must be at least 3 characters").max(100, "Title cannot exceed 100 characters"),
+  description: z.string().max(1000, "Description cannot exceed 1000 characters").optional(),
+  githubUrl: z
+    .string()
+    .url("Invalid URL format")
+    .regex(/^https?:\/\/(www\.)?github\.com/, "Must be a valid GitHub URL")
+    .optional(),
+  repoUrl: urlSchema,
+  demoUrl: urlSchema,
+  images: z.array(z.string().url("Invalid image URL")).optional(),
+});
+
+// Certificate schema
+const certificateSchema = z.object({
+  title: z.string().min(3, "Title must be at least 3 characters").max(100, "Title cannot exceed 100 characters"),
+  issuer: z.string().min(2, "Issuer must be at least 2 characters").max(50, "Issuer cannot exceed 50 characters"),
+  issueDate: z.preprocess(
+    (arg) => {
+      if (typeof arg === "string") {
+        // Assume date is in YYYY-MM-DD
+        const parts = arg.split("-");
+        if (parts.length === 3 && parts[0].length === 4) {
+          return new Date(arg);
+        }
+      }
+      return new Date("invalid-date");
+    },
+    z.date().refine((date) => date <= new Date(), {
+      message: "Issue date cannot be in the future",
     })
-    .withMessage("Password must be at least 6 characters"),
-  validationMiddleware,
-];
+  ),
+  url: urlSchema,
+});
 
-const registerValidation = [
-  check("email").trim().notEmpty().withMessage("Email is required").isEmail().withMessage("Invalid email format").normalizeEmail(),
-  check("password")
-    .notEmpty()
-    .withMessage("Password is required")
-    .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters")
-    .matches(/^(?=.*[A-Za-z])(?=.*\d)/)
-    .withMessage("Password must contain at least one letter and one number"),
-  check("name")
-    .trim()
-    .notEmpty()
-    .withMessage("Name is required")
-    .isLength({ min: 2, max: 50 })
-    .withMessage("Name must be between 2 and 50 characters")
-    .matches(/^[a-zA-Z\s]*$/)
-    .withMessage("Name can only contain letters and spaces"),
-  validationMiddleware,
-];
+// Types
+type LoginInput = z.infer<typeof loginSchema>;
+type RegisterInput = z.infer<typeof registerSchema>;
+type PortfolioInput = z.infer<typeof portfolioSchema>;
+type ProjectInput = z.infer<typeof projectSchema>;
+type CertificateInput = z.infer<typeof certificateSchema>;
 
-const portfolioValidation = [
-  check("template")
-    .notEmpty()
-    .withMessage("Template is required")
-    .isString()
-    .withMessage("Template must be a string")
-    .isIn(["modern", "classic", "minimal"])
-    .withMessage("Invalid template type"),
-  check("title")
-    .notEmpty()
-    .withMessage("Title is required")
-    .isString()
-    .withMessage("Title must be a string")
-    .isLength({ min: 3, max: 100 })
-    .withMessage("Title must be between 3 and 100 characters"),
-  check("description")
-    .optional()
-    .isString()
-    .withMessage("Description must be a string")
-    .isLength({ max: 500 })
-    .withMessage("Description cannot exceed 500 characters"),
-  check("skills")
-    .optional()
-    .isArray()
-    .withMessage("Skills must be an array")
-    .custom((skills: unknown[]) => skills.every((skill) => typeof skill === "string")),
-  check("projectIds")
-    .optional()
-    .isArray()
-    .withMessage("Project IDs must be an array")
-    .custom((ids: unknown[]) => ids.every((id) => Number.isInteger(id) && (id as number) > 0)),
-  check("certificateIds")
-    .optional()
-    .isArray()
-    .withMessage("Certificate IDs must be an array")
-    .custom((ids: unknown[]) => ids.every((id) => Number.isInteger(id) && (id as number) > 0)),
-  validationMiddleware,
-];
+// Generic validation middleware
+const validate = (schema: z.ZodSchema) => async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const validatedData = await schema.parseAsync(req.body);
+    req.body = validatedData;
+    next();
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({
+        success: false,
+        error: "Validation failed",
+        details: error.errors.map((err) => ({
+          field: err.path.join("."),
+          message: err.message,
+        })),
+      });
+      return;
+    }
 
-const projectValidation = [
-  check("title")
-    .trim()
-    .notEmpty()
-    .withMessage("Title is required")
-    .isLength({ min: 3, max: 100 })
-    .withMessage("Title must be between 3 and 100 characters"),
-  check("description")
-    .optional()
-    .trim()
-    .isString()
-    .withMessage("Description must be a string")
-    .isLength({ max: 1000 })
-    .withMessage("Description cannot exceed 1000 characters"),
-  check("githubUrl")
-    .optional()
-    .trim()
-    .isURL()
-    .withMessage("Invalid GitHub URL")
-    .matches(/^https?:\/\/(www\.)?github\.com/)
-    .withMessage("Must be a valid GitHub URL"),
-  check("demoUrl").optional().trim().isURL().withMessage("Invalid demo URL"),
-  check("images")
-    .optional()
-    .isArray()
-    .withMessage("Images must be an array")
-    .custom((images: unknown[]) => images.every((url) => typeof url === "string" && isValidUrl(url))),
-  validationMiddleware,
-];
+    res.status(500).json({
+      success: false,
+      error: "Internal server error during validation",
+    });
+  }
+};
 
-const certificateValidation = [
-  check("title")
-    .trim()
-    .notEmpty()
-    .withMessage("Title is required")
-    .isLength({ min: 3, max: 100 })
-    .withMessage("Title must be between 3 and 100 characters"),
-  check("issuer")
-    .trim()
-    .notEmpty()
-    .withMessage("Issuer is required")
-    .isLength({ min: 2, max: 50 })
-    .withMessage("Issuer must be between 2 and 50 characters"),
-  check("issueDate")
-    .notEmpty()
-    .withMessage("Issue date is required")
-    .isISO8601()
-    .withMessage("Invalid date format")
-    .custom((value: string) => new Date(value) <= new Date()),
-  check("url").optional().trim().isURL().withMessage("Invalid certificate URL"),
-  check("expiryDate")
-    .optional()
-    .isISO8601()
-    .withMessage("Invalid date format")
-    .custom((value: string, { req }) => !value || new Date(value) > new Date(req.body.issueDate)),
-  validationMiddleware,
-];
+// Export validation middlewares
+const validateLogin = validate(loginSchema);
+const validateRegister = validate(registerSchema);
+const validatePortfolio = validate(portfolioSchema);
+const validateProject = validate(projectSchema);
+const validateCertificate = validate(certificateSchema);
 
-export { certificateValidation, loginValidation, portfolioValidation, projectValidation, registerValidation };
+export {
+  validateLogin,
+  validateRegister,
+  validatePortfolio,
+  validateProject,
+  validateCertificate,
+  type LoginInput,
+  type RegisterInput,
+  type PortfolioInput,
+  type ProjectInput,
+  type CertificateInput,
+};

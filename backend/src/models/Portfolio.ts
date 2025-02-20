@@ -1,83 +1,98 @@
-import { BelongsToManySetAssociationsMixin, DataTypes, Model, Optional } from "sequelize";
+import { BelongsToManySetAssociationsMixin, DataTypes, InitOptions, Model, ModelAttributes, Optional } from "sequelize";
 
 import sequelize from "../config/database.js";
 import Certificate from "./Certificate.js";
 import Project from "./Project.js";
 
-// Define the attributes for the Portfolio model
+// Base attributes interface
 interface PortfolioAttributes {
-  id: number;
+  readonly id: number;
   template: string;
   title: string;
-  description?: string;
+  description?: string | null;
   skills: string[];
-  shareableLink?: string;
+  shareableLink?: string | null;
   userId: number;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+// Interface for creating a new portfolio
+interface PortfolioCreationAttributes extends Omit<PortfolioAttributes, "id" | "createdAt" | "updatedAt"> {
+  id?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-// Define attributes for creating a new Portfolio instance
-interface PortfolioCreationAttributes
-  extends Optional<PortfolioAttributes, "id" | "description" | "skills" | "shareableLink" | "createdAt" | "updatedAt"> {}
-
-// Extend the Portfolio model to include association mixins
+// Define the Portfolio model class
 class Portfolio extends Model<PortfolioAttributes, PortfolioCreationAttributes> implements PortfolioAttributes {
-  public id!: number;
-  public template!: string;
-  public title!: string;
-  public description?: string;
-  public skills!: string[];
-  public shareableLink?: string;
-  public userId!: number;
-
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  declare readonly id: number;
+  declare template: string;
+  declare title: string;
+  declare description: string | null;
+  declare skills: string[];
+  declare shareableLink: string | null;
+  declare userId: number;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 
   // Association mixin methods
-  public setProjects!: BelongsToManySetAssociationsMixin<Project, number>;
-  public setCertificates!: BelongsToManySetAssociationsMixin<Certificate, number>;
+  declare setProjects: BelongsToManySetAssociationsMixin<Project, number>;
+  declare setCertificates: BelongsToManySetAssociationsMixin<Certificate, number>;
 }
 
-Portfolio.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    template: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    title: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    skills: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: false,
-      defaultValue: [],
-    },
-    shareableLink: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      unique: true,
-    },
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
+// Model attributes configuration
+const attributes: ModelAttributes<Portfolio, PortfolioAttributes> = {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  {
-    sequelize,
-    tableName: "portfolios",
-    timestamps: true,
-  }
-);
+  template: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  skills: {
+    type: DataTypes.ARRAY(DataTypes.STRING),
+    allowNull: false,
+    // defaultValue: [],
+  },
+  shareableLink: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true,
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+};
+
+// Model configuration options
+const options: InitOptions<Portfolio> = {
+  sequelize,
+  tableName: "portfolios",
+  timestamps: true,
+  underscored: true,
+};
+
+// Initialize the model
+Portfolio.init(attributes, options);
 
 export default Portfolio;

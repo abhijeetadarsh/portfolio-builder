@@ -93,7 +93,7 @@ paths:
           description: Invalid credentials
         500:
           description: Server error
-          
+
   /api/auth/change-password:
     put:
       tags: [Authentication]

@@ -5,7 +5,8 @@ import User from "../models/User.js";
 const getProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!res.locals.user) {
-      res.status(401).json({ message: "Unauthorized" });
+      res.status(401).json({
+          success: false, message: "Unauthorized" });
       return;
     }
 
@@ -14,20 +15,23 @@ const getProfile = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (!user) {
-      res.status(404).json({ message: "User not found" });
+      res.status(404).json({
+          success: false, message: "User not found" });
       return;
     }
 
     res.json(user);
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+          success: false, message: error.message });
   }
 };
 
 const updateProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!res.locals.user) {
-      res.status(401).json({ message: "Unauthorized" });
+      res.status(401).json({
+          success: false, message: "Unauthorized" });
       return;
     }
 
@@ -36,7 +40,8 @@ const updateProfile = async (req: Request, res: Response): Promise<void> => {
     const user = await User.findByPk(res.locals.user.id);
 
     if (!user) {
-      res.status(404).json({ message: "User not found" });
+      res.status(404).json({
+          success: false, message: "User not found" });
       return;
     }
 
@@ -48,7 +53,8 @@ const updateProfile = async (req: Request, res: Response): Promise<void> => {
 
     res.json(updatedUser);
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+          success: false, message: error.message });
   }
 };
 

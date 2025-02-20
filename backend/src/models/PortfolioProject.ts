@@ -8,8 +8,8 @@ interface PortfolioProjectAttributes {
 }
 
 class PortfolioProject extends Model<PortfolioProjectAttributes> implements PortfolioProjectAttributes {
-  public portfolioId!: number;
-  public projectId!: number;
+  declare portfolioId: number;
+  declare projectId: number;
 }
 
 PortfolioProject.init(
@@ -27,8 +27,9 @@ PortfolioProject.init(
   },
   {
     sequelize,
-    tableName: "PortfolioProjects",
+    tableName: "portfolios_x_projects",
     timestamps: false,
+    underscored: true,
   }
 );
 

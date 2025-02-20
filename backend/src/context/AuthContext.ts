@@ -1,4 +1,8 @@
+import { User, Portfolio, Project, Certificate } from "../models/index.js";
+
 export interface AuthContext {
-  user?: any; // Replace `any` with a proper User type if available
-  portfolio?: any; // Replace `any` with a proper Portfolio type if available
+  user?: User;
+  portfolio?: Portfolio;
+  project?: Project;
+  certificate?: Certificate;
 }
