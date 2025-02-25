@@ -16,10 +16,10 @@ router.post("/register", validateRegister, register);
 
 router.post("/login", validateLogin, login);
 
-router.put("/change-password", authenticate, validateChangePassword, changePassword);
+router.put("/change-passwd", authenticate, validateChangePassword, changePassword);
 
-router.post("/forgot-password", validateForgotPassword, forgotPassword);
+router.post("/forgot-passwd", validateForgotPassword, forgotPassword);
 
-router.post("/reset-password", validateResetPassword, resetPassword);
+router.post("/reset-passwd", validateResetPassword, resetPassword);
 
 export default router;

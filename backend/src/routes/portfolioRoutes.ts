@@ -1,33 +1,38 @@
 import { Router } from "express";
 
-import upload from "../config/multer.js";
-import {
-  createPortfolio,
-  deletePortfolio,
-  getPortfolioByLink,
-  updatePortfolio,
-} from "../controllers/portfolioController.js";
 import authenticate from "../middleware/authMiddleware.js";
 import { checkPortfolioOwnership } from "../middleware/ownershipMiddleware.js";
-import { validatePortfolio } from "../middleware/validationMiddleware.js";
+import { validatePortfolio, validateProjectIds, validateCertificateIds } from "../middleware/validationMiddleware.js";
+import {
+  createPortfolio,
+  linkProjects,
+  linkCertificates,
+  updatePortfolio,
+  resetShareableLink,
+  deletePortfolio,
+  getAllPortfolios,
+  getPortfolioById,
+  getPortfolioByLink,
+} from "../controllers/portfolioController.js";
 
 const router: Router = Router();
 
 router.post("/", authenticate, validatePortfolio, createPortfolio);
 
+router.patch("/:id/projects", authenticate, checkPortfolioOwnership, validateProjectIds, linkProjects);
+
+router.patch("/:id/certificates", authenticate, checkPortfolioOwnership, validateCertificateIds, linkCertificates);
+
 router.put("/:id", authenticate, checkPortfolioOwnership, validatePortfolio, updatePortfolio);
+
+router.patch("/:id/reset-shareable-link", authenticate, checkPortfolioOwnership, resetShareableLink);
 
 router.delete("/:id", authenticate, checkPortfolioOwnership, deletePortfolio);
 
-router.get("/share/:link", getPortfolioByLink);
+router.get("/", authenticate, getAllPortfolios);
 
-// router.post("/:id/projects", authenticate, checkPortfolioOwnership, projectValidation, addProject);
+router.get("/:id", authenticate, checkPortfolioOwnership, getPortfolioById);
 
-// router.post("/:id/certificates", authenticate, checkPortfolioOwnership, certificateValidation, addCertificate);
-
-// router.post("/upload", authenticate, upload.single("file"), (req: Request, res: Response): void => {
-//   const fileUrl = `/uploads/${(req.file as Express.Multer.File).filename}`;
-//   res.json({ url: fileUrl });
-// });
+router.get("/:link", getPortfolioByLink);
 
 export default router;

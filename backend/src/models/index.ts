@@ -45,4 +45,103 @@ Certificate.belongsToMany(Portfolio, {
   onDelete: "CASCADE",
 });
 
+
+
+PortfolioCertificate.beforeBulkCreate(async (instances, options) => {
+  console.log("Gadha PortfolioCertificate.beforeBulkCreate", instances);
+  if (!instances || !Array.isArray(instances)) {
+    return;
+  }
+  
+  for (const instance of instances) {
+    const portfolio = await Portfolio.findByPk(instance.portfolioId);
+    const certificate = await Certificate.findByPk(instance.certificateId);
+    
+    console.log("Suar PortfolioCertificate.beforeBulkCreate", portfolio, certificate);
+    if (!portfolio || !certificate) {
+      throw new Error("Portfolio or Certificate not found");
+    }
+    
+    if (portfolio.userId !== certificate.userId) {
+      throw new Error(`Certificate ${certificate.id} belongs to user ${certificate.userId} but portfolio belongs to user ${portfolio.userId}`);
+    }
+  }
+});
+
+PortfolioCertificate.beforeCreate(async (instance, options) => {
+  console.log("PortfolioCertificate.beforeCreate", instance);
+  const portfolio = await Portfolio.findByPk(instance.portfolioId);
+  const certificate = await Certificate.findByPk(instance.certificateId);
+
+  if (!portfolio || !certificate) {
+    throw new Error("Portfolio or Certificate not found");
+  }
+
+  if (portfolio.userId !== certificate.userId) {
+    throw new Error("Cannot associate a Certificate with a Portfolio from different users");
+  }
+});
+
+PortfolioCertificate.beforeUpdate(async (instance, options) => {
+  console.log("PortfolioCertificate.beforeUpdate", instance);
+  const portfolio = await Portfolio.findByPk(instance.portfolioId);
+  const certificate = await Certificate.findByPk(instance.certificateId);
+
+  if (!portfolio || !certificate) {
+    throw new Error("Portfolio or Certificate not found");
+  }
+
+  if (portfolio.userId !== certificate.userId) {
+    throw new Error("Cannot associate a Certificate with a Portfolio from different users");
+  }
+});
+
+
+PortfolioProject.beforeBulkCreate(async (instances, options) => {
+  if (!instances || !Array.isArray(instances)) {
+    return;
+  }
+  
+  for (const instance of instances) {
+    const portfolio = await Portfolio.findByPk(instance.portfolioId);
+    const project = await Project.findByPk(instance.projectId);
+    
+    if (!portfolio || !project) {
+      throw new Error("Portfolio or Project not found");
+    }
+    
+    if (portfolio.userId !== project.userId) {
+      throw new Error(`Project ${project.id} belongs to user ${project.userId} but portfolio belongs to user ${portfolio.userId}`);
+    }
+  }
+});
+
+PortfolioProject.beforeCreate(async (instance, options) => {
+  console.log("PortfolioProject.beforeCreate", instance);
+  const portfolio = await Portfolio.findByPk(instance.portfolioId);
+  const project = await Project.findByPk(instance.projectId);
+
+  if (!portfolio || !project) {
+    throw new Error("Portfolio or Project not found");
+  }
+
+  if (portfolio.userId !== project.userId) {
+    throw new Error("Cannot associate a Project with a Portfolio from different users");
+  }
+});
+
+PortfolioProject.beforeUpdate(async (instance, options) => {
+  console.log("PortfolioProject.beforeUpdate", instance);
+  const portfolio = await Portfolio.findByPk(instance.portfolioId);
+  const project = await Project.findByPk(instance.projectId);
+
+  if (!portfolio || !project) {
+    throw new Error("Portfolio or Project not found");
+  }
+
+  if (portfolio.userId !== project.userId) {
+    throw new Error("Cannot associate a Project with a Portfolio from different users");
+  }
+});
+
 export { Certificate, Portfolio, PortfolioCertificate, PortfolioProject, Project, User };

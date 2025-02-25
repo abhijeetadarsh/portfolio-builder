@@ -54,6 +54,7 @@ const attributes: ModelAttributes<Portfolio, PortfolioAttributes> = {
   },
   title: {
     type: DataTypes.STRING,
+    unique: true,
     allowNull: false,
   },
   description: {
