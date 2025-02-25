@@ -22,6 +22,9 @@ services:
       - POSTGRES_PORT=${POSTGRES_PORT}
       - PORT=${PORT}
       - JWT_SECRET=${JWT_SECRET}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - FRONTEND_URL=${FRONTEND_URL}
     networks:
       - pb_network_dev
     # restart: unless-stopped
@@ -34,8 +37,6 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    ports:
-      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
     networks:

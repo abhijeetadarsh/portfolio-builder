@@ -5,7 +5,8 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install -g pnpm
+RUN pnpm install --only=production
 
 # Copy source code
 COPY . .
@@ -13,4 +14,4 @@ COPY . .
 # Expose API port
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["pnpm", "start"]
