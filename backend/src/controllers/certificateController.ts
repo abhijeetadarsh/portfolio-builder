@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { ValidationError } from "sequelize";
 import { Certificate } from "../models/index.js";
 
 const createCertificate = async (req: Request, res: Response): Promise<void> => {
@@ -15,22 +14,11 @@ const createCertificate = async (req: Request, res: Response): Promise<void> => 
       success: true,
       data: newCertificate,
     });
-  } catch (error) {
-    if (error instanceof ValidationError) {
-      res.status(400).json({
-        success: false,
-        error: "Invalid input data",
-        details: error.errors.map((err) => ({
-          field: err.path,
-          message: err.message,
-        })),
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: "Failed to create certificate",
-      });
-    }
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };
 
@@ -43,22 +31,11 @@ const updateCertificate = async (req: Request, res: Response): Promise<void> => 
       success: true,
       data: certificate,
     });
-  } catch (error) {
-    if (error instanceof ValidationError) {
-      res.status(400).json({
-        success: false,
-        error: "Invalid input data",
-        details: error.errors.map((err) => ({
-          field: err.path,
-          message: err.message,
-        })),
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: "Failed to update certificate",
-      });
-    }
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };
 
@@ -71,10 +48,10 @@ const deleteCertificate = async (req: Request, res: Response): Promise<void> => 
       success: true,
       message: "Certificate deleted successfully",
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: "Failed to delete certificate",
+      error: error.message,
     });
   }
 };
@@ -109,10 +86,10 @@ const getAllCertificates = async (req: Request, res: Response): Promise<void> =>
         },
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: "Failed to fetch certificates",
+      error: error.message,
     });
   }
 };
@@ -125,10 +102,10 @@ const getCertificateById = async (req: Request, res: Response): Promise<void> =>
       success: true,
       data: certificate,
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: "Failed to fetch certificate",
+      error: error.message,
     });
   }
 };

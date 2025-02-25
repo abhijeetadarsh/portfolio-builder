@@ -47,9 +47,10 @@ const portfolioSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters").max(100, "Title cannot exceed 100 characters"),
   description: z.string().max(500, "Description cannot exceed 500 characters").optional(),
   skills: z.array(z.string()).optional(),
-  projectIds: z.array(z.number().positive()).optional(),
-  certificateIds: z.array(z.number().positive()).optional(),
 });
+
+const projectIdsSchema = z.array(z.number().positive()).optional();
+const certificateIdsSchema = z.array(z.number().positive()).optional();
 
 // Project schema
 const projectSchema = z.object({
@@ -94,6 +95,8 @@ type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 type PortfolioInput = z.infer<typeof portfolioSchema>;
+type ProjectIdsInput = z.infer<typeof projectIdsSchema>;
+type CertificateIdsInput = z.infer<typeof certificateIdsSchema>;
 type ProjectInput = z.infer<typeof projectSchema>;
 type CertificateInput = z.infer<typeof certificateSchema>;
 
@@ -130,6 +133,8 @@ const validateChangePassword = validate(changePasswordSchema);
 const validateForgotPassword = validate(forgotPasswordSchema);
 const validateResetPassword = validate(resetPasswordSchema);
 const validatePortfolio = validate(portfolioSchema);
+const validateProjectIds = validate(projectIdsSchema);
+const validateCertificateIds = validate(certificateIdsSchema);
 const validateProject = validate(projectSchema);
 const validateCertificate = validate(certificateSchema);
 
@@ -140,12 +145,18 @@ export {
   validateForgotPassword,
   validateResetPassword,
   validatePortfolio,
+  validateProjectIds,
+  validateCertificateIds,
   validateProject,
   validateCertificate,
   type LoginInput,
   type RegisterInput,
   type ChangePasswordInput,
+  type ForgotPasswordInput,
+  type ResetPasswordInput,
   type PortfolioInput,
+  type ProjectIdsInput,
+  type CertificateIdsInput,
   type ProjectInput,
   type CertificateInput,
 };

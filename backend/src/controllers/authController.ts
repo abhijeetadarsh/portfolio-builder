@@ -20,10 +20,12 @@ const register = async (req: Request, res: Response): Promise<void> => {
     const user = await User.create({ email, password, name });
 
     res.status(201).json({
-      success: false,
-      id: user.id,
-      email: user.email,
-      name: user.name,
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
     });
   } catch (error: any) {
     if (error.name === "SequelizeUniqueConstraintError") {
@@ -67,6 +69,7 @@ const login = async (req: Request, res: Response): Promise<void> => {
     });
 
     res.json({
+      success: true,
       token,
       user: {
         id: user.id,

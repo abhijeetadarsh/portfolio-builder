@@ -5,7 +5,10 @@ import User from "../models/User.js";
 const getProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     const user = res.locals.user!;
-    res.json(user);
+    res.json({
+      success: true,
+      user,
+    });
   } catch (error: any) {
     res.status(500).json({
       success: false,
@@ -24,7 +27,10 @@ const updateProfile = async (req: Request, res: Response): Promise<void> => {
       attributes: { exclude: ["password"] },
     });
 
-    res.json(updatedUser);
+    res.json({
+      success: true,
+      user: updatedUser,
+    });
   } catch (error: any) {
     res.status(500).json({
       success: false,

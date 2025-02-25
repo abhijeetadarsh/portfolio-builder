@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { ValidationError, Op } from "sequelize";
 import { Project } from "../models/index.js";
 
 const createProject = async (req: Request, res: Response): Promise<void> => {
@@ -15,22 +14,11 @@ const createProject = async (req: Request, res: Response): Promise<void> => {
       success: true,
       data: newProject,
     });
-  } catch (error) {
-    if (error instanceof ValidationError) {
-      res.status(400).json({
-        success: false,
-        error: "Validation error",
-        details: error.errors.map((err) => ({
-          field: err.path,
-          message: err.message,
-        })),
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: "Failed to create project",
-      });
-    }
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };
 
@@ -43,22 +31,11 @@ const updateProject = async (req: Request, res: Response): Promise<void> => {
       success: true,
       data: project,
     });
-  } catch (error) {
-    if (error instanceof ValidationError) {
-      res.status(400).json({
-        success: false,
-        error: "Validation error",
-        details: error.errors.map((err) => ({
-          field: err.path,
-          message: err.message,
-        })),
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: "Failed to update project",
-      });
-    }
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };
 
@@ -71,10 +48,10 @@ const deleteProject = async (req: Request, res: Response): Promise<void> => {
       success: true,
       message: "Project deleted successfully",
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: "Failed to delete project",
+      error: error.message,
     });
   }
 };
@@ -109,10 +86,10 @@ const getAllProjects = async (req: Request, res: Response): Promise<void> => {
         },
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: "Failed to fetch projects",
+      error: error.message,
     });
   }
 };
@@ -125,10 +102,10 @@ const getProjectById = async (req: Request, res: Response): Promise<void> => {
       success: true,
       data: project,
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: "Failed to fetch project",
+      error: error.message,
     });
   }
 };
